@@ -10,7 +10,7 @@ from storybot.tokenizer import train_bpe
 if __name__ == '__main__':
     vocab_size = 50000
     file_path = "webbot/owt_train.txt"
-    merge_rules = train_bpe(file_path, vocab_size, num_processes=8)
+    merge_rules = train_bpe(file_path, vocab_size, num_processes=8, num_chunks=64)
 
     with open("webbot/merge_rules.pkl", "wb") as f:
         pickle.dump(merge_rules, f)
