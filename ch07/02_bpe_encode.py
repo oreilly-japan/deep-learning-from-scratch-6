@@ -7,12 +7,12 @@ from storybot.tokenizer import BPETokenizer
 
 
 if __name__ == '__main__':
-    tokenizer = BPETokenizer.load_from("storybot/merge_rules.pkl")
+    tokenizer = BPETokenizer.load_from("webbot/merge_rules.pkl")
 
     tokenizer.encode_file(
-        "storybot/tiny_stories_train.txt",
-        "storybot/tiny_stories_train.bin", num_processes=8)
+        "webbot/owt_train.txt",
+        "webbot/owt_train.bin", num_processes=8)
 
     tokenizer.encode_file(
-        "storybot/tiny_stories_valid.txt",
-        "storybot/tiny_stories_valid.bin", num_processes=8)
+        "webbot/owt_valid.txt",
+        "webbot/owt_valid.bin", num_processes=8)
