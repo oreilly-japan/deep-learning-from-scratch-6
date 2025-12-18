@@ -1,4 +1,4 @@
-ゼロから作る Deep Learning ❻ —— LLM編
+ゼロから作る Deep Learning ❻ —LLM編
 =============================
 
 <!-- [<img src="https://raw.githubusercontent.com/oreilly-japan/deep-learning-from-scratch-5/images/cover.png" width="200px">](https://www.amazon.co.jp/dp/4814400594/) -->
