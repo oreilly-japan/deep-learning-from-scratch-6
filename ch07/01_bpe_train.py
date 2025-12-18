@@ -8,7 +8,7 @@ from storybot.tokenizer import train_bpe
 
 
 if __name__ == '__main__':
-    vocab_size = 10000
+    vocab_size = 40000
     file_path = "webbot/owt_train.txt"
     merge_rules = train_bpe(file_path, vocab_size, num_processes=8)
 
