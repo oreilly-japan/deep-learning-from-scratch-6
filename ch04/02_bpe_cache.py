@@ -1,3 +1,7 @@
+import os, sys
+os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+sys.path.append('.')
+
 from collections import defaultdict
 import regex as re
 from tqdm import tqdm
