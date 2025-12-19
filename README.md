@@ -4,14 +4,14 @@
 <!-- [<img src="https://raw.githubusercontent.com/oreilly-japan/deep-learning-from-scratch-5/images/cover.png" width="200px">](https://www.amazon.co.jp/dp/4814400594/) -->
 
 
-書籍『[ゼロから作るDeep Learning ❻](https://www.amazon.co.jp/dp/xxxx/)』（オライリー・ジャパン発行）のサポートサイトです。本書籍で使用するソースコードがまとめられています。
+書籍『[ゼロから作るDeep Learning ❻](https://www.amazon.co.jp/dp/4814401612)』（オライリー・ジャパン発行）のサポートサイトです。本書籍で使用するソースコードがまとめられています。
 
 
 ## ファイル構成
 
 |フォルダ名 |説明                             |
 |:--        |:--                              |
-|`ch01`〜`ch06`|各章で使用するコード|
+|`ch01`〜`ch09`|各章で使用するコード|
 |`codebot`   |CodeBotで使用するコードやデータ |
 |`storybot`   |StoryBotで使用するコードやデータ |
 |`webbot`   |WebBotで使用するコードやデータ |

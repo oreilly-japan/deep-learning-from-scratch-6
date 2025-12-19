@@ -76,8 +76,8 @@ def evaluate(model, val_data, context_len, batch_size, device):
 
 # 設定
 device = get_device()
-data_path = 'data/tiny_stories_train.bin'
-val_data_path = 'data/tiny_stories_valid.bin'
+data_path = 'storybot/tiny_stories_train.bin'
+val_data_path = 'storybot/tiny_stories_valid.bin'
 tokenizer_path = 'storybot/merge_rules.pkl'
 model_save_path = 'storybot/model_pretrain.pt'
 
