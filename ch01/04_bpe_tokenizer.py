@@ -62,9 +62,9 @@ merge_rules = {(105, 115): 256, (256, 32): 257, (105, 110): 258, (72, 101): 259}
 tokenizer = BPETokenizer(merge_rules)
 
 # テキストをエンコード
-text = "Hello"
+text = "Hello世界😁"
 ids = tokenizer.encode(text)
 decoded = tokenizer.decode(ids)
 
-print(ids)  # [259, 108, 108, 111]
-print(decoded)    # Hello
+print(ids)  # [259, 108, 108, 111, 228, 184, 150, 231, 149, 140, 240, 159, 152, 129]
+print(decoded)  # Hello世界😁

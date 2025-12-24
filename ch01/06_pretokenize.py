@@ -42,7 +42,7 @@ def train_bpe(input_text, vocab_size, end_token="<|endoftext|>"):
     num_merges = vocab_size - 256 - 1
     merge_rules = {}
 
-    for step in tqdm(range(num_merges), desc="Trainig BPE"):  # tqdmで進捗表示
+    for step in tqdm(range(num_merges), desc="Training BPE"):  # tqdmで進捗表示
         counts = defaultdict(int)
         for ids in ids_list:
             counts = count_pairs(ids, counts)
