@@ -45,5 +45,5 @@ for name, encoding_name in [('GPT-2', 'gpt2'), ('cl100k_base', 'cl100k_base')]:
     encoding = tiktoken.get_encoding(encoding_name)
     token_count = len(encoding.encode(text, allowed_special={'<|endoftext|>'}))
     ratio = byte_count / token_count
-    print(f"{name}: 語彙数 {encoding.n_vocab:,}, 圧縮率 {ratio:.2f}倍")
+    print(f"{name}: 語彙サイズ {encoding.n_vocab:,}, 圧縮率 {ratio:.2f}倍")
 """

@@ -35,7 +35,7 @@ def train_bpe(text, vocab_size):
     ids = list(text.encode("utf-8"))
 
     # マージ回数を決定
-    num_merges = vocab_size - 256  # 256は初期の語彙数
+    num_merges = vocab_size - 256  # 256は初期の語彙サイズ
     merge_rules = {}
 
     for step in range(num_merges):

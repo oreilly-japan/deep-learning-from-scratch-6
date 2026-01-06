@@ -5,7 +5,7 @@ sys.path.append('.')
 import pickle
 from codebot.tokenizer import train_bpe
 
-vocab_size = 1000  # 語彙数
+vocab_size = 1000  # 語彙サイズ
 text = open("codebot/tiny_codes.txt").read()
 merge_rules = train_bpe(text, vocab_size)
 
