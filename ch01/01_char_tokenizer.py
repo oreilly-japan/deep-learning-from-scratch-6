@@ -7,7 +7,7 @@ print(ord('😁'))  # 128513
 print(chr(104))    # 'h'
 print(chr(128513)) # '😁'
 
-ids = [ord(w) for w in list(text)]
+ids = [ord(char) for char in list(text)]
 print(ids)  # [104, 101, 108, 108, 111, 19990, 30028, 128513]
 
 class CharTokenizer:
