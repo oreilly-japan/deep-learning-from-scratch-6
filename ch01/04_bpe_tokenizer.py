@@ -26,14 +26,14 @@ class BPETokenizer:
         self.merge_rules = merge_rules
 
         # IDからバイト列への対応表（0~255を登録）
-        self.id_to_byte = {i: bytes([i]) for i in range(256)}
+        self.id_to_bytes = {i: bytes([i]) for i in range(256)}
 
         # マージされたトークンは元のトークンのバイト列を連結
         for (token1, token2), new_id in merge_rules.items():
-            self.id_to_byte[new_id] = self.id_to_byte[token1] + self.id_to_byte[token2]
+            self.id_to_bytes[new_id] = self.id_to_bytes[token1] + self.id_to_bytes[token2]
 
         # 語彙サイズを設定
-        self.vocab_size = len(self.id_to_byte)
+        self.vocab_size = len(self.id_to_bytes)
 
     def encode(self, text):
         ids = list(text.encode("utf-8"))
@@ -46,7 +46,7 @@ class BPETokenizer:
 
     def decode(self, ids):
         # 各トークンIDを対応するバイト列に変換
-        byte_list = [self.id_to_byte[i] for i in ids]
+        byte_list = [self.id_to_bytes[i] for i in ids]
 
         # すべてのバイト列を連結
         combined_bytes = b"".join(byte_list)
