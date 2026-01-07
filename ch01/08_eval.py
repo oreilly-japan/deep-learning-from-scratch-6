@@ -28,7 +28,7 @@ ids = tokenizer.encode(sample_text)
 ids_count = len(ids)
 compression_ratio = byte_count / ids_count
 
-print(f"\n=== 圧縮効率 ===")
+print("\n=== 圧縮効率 ===")
 print(f"バイト数: {byte_count:,}")
 print(f"トークン数: {ids_count:,}")
 print(f"圧縮率: {compression_ratio:.2f}倍（平均 {compression_ratio:.2f} バイト/トークン）")
