@@ -9,8 +9,10 @@ def pretokenize_iter(text):
     for m in re.finditer(pattern, text):
         yield m.group(0)
 
-def count_pairs(ids):
-    counts = defaultdict(int)
+def count_pairs(ids, counts=None):
+    if counts is None:
+        counts = defaultdict(int)
+
     for pair in zip(ids, ids[1:]):
         counts[pair] += 1
     return counts
@@ -39,17 +41,15 @@ def train_bpe(input_text, vocab_size, end_token="<|endoftext|>"):
     merge_rules = {}
 
     for step in tqdm(range(num_merges), desc="Training BPE"):
-        all_counts = defaultdict(int)
+        counts = defaultdict(int)
         for ids in ids_list:
-            counts = count_pairs(ids)
-            for pair, count in counts.items():
-                all_counts[pair] += count
+            counts = count_pairs(ids, counts)
 
-        if not all_counts:
+        if not counts:
             break
 
-        # best_pair = max(all_counts, key=all_counts.get)
-        best_pair = max(all_counts, key=lambda pair: (all_counts[pair], pair[0], pair[1]))
+        # best_pair = max(counts, key=counts.get)
+        best_pair = max(counts, key=lambda pair: (counts[pair], pair[0], pair[1]))
 
         new_id = 256 + step
         merge_rules[best_pair] = new_id

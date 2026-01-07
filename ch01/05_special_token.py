@@ -37,17 +37,22 @@ def train_bpe(input_text, vocab_size, end_token="<|endoftext|>"):
     merge_rules = {}
 
     for step in range(num_merges):
-        # 全てのテキストから隣接ペアの頻度を集計
+        # 隣接ペアの頻度を集計
         counts = defaultdict(int)
         for ids in ids_list:
             counts = count_pairs(ids, counts)
 
+        # ペアが存在しない場合の処理
+        if not counts:
+            break
+
         # 最頻出ペアを選択
         best_pair = max(counts, key=counts.get)
+        # best_pair = max(counts, key=lambda pair: (counts[pair], pair[0], pair[1]))
         new_id = 256 + step
         merge_rules[best_pair] = new_id
 
-        # 全てのテキストでマージを実行
+        # マージを実行
         for i in range(len(ids_list)):
             ids_list[i] = merge(ids_list[i], best_pair, new_id)
 

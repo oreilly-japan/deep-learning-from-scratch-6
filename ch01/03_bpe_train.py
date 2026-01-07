@@ -42,6 +42,10 @@ def train_bpe(text, vocab_size):
         # 隣接ペアの統計を取得
         counts = count_pairs(ids)
 
+        # ペアが存在しない場合の処理
+        if not counts:
+            break
+
         # 最頻出ペアを選択
         best_pair = max(counts, key=counts.get)
         # best_pair = max(counts, key=lambda pair: (counts[pair], pair[0], pair[1]))

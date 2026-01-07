@@ -152,6 +152,9 @@ def train_bpe(file_path, vocab_size, end_token="<|endoftext|>", num_processes=8,
             pair_to_ids[pair].add(ids)
 
     for step in tqdm(range(num_merges), desc="Training BPE"):
+        if not pair_counts:  # ペアが存在しない場合の処理
+            break
+
         # 最頻出ペアを選択
         # best_pair = max(pair_counts, key=pair_counts.get)
         best_pair = max(pair_counts, key=lambda pair: (pair_counts[pair], pair[0], pair[1]))

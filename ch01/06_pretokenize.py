@@ -47,7 +47,12 @@ def train_bpe(input_text, vocab_size, end_token="<|endoftext|>"):
         for ids in ids_list:
             counts = count_pairs(ids, counts)
 
+        if not counts:
+            break
+
         best_pair = max(counts, key=counts.get)
+        # best_pair = max(counts, key=lambda pair: (counts[pair], pair[0], pair[1]))
+
         new_id = 256 + step
         merge_rules[best_pair] = new_id
 
