@@ -16,7 +16,7 @@ temperature = 1.0
 def format_prompt(user_message):
     return f"### Instruction:\n{user_message}\n\n### Response:\n"
 
-# モデルとトークナイザーの読み込み
+# モデルとトークナイザの読み込み
 tokenizer = BPETokenizer.load_from(tokenizer_path)
 model = GPT.load_from(model_path, device=device)
 
