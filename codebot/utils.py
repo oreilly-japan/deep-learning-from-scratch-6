@@ -17,8 +17,8 @@ def generate(model, tokenizer, prompt, max_new_tokens=1000, temperature=1.0):
     # ❷ トークン生成ループ
     for _ in range(max_new_tokens):
         # コンテキスト長を超えた場合は末尾のみ使用
-        if ids.size(1) > model.context_len:
-            ids = ids[:, -model.context_len:]
+        if ids.size(1) > model.max_context_len:
+            ids = ids[:, -model.max_context_len:]
 
         # 次のトークンの予測
         logits = model(ids)[:, -1, :]

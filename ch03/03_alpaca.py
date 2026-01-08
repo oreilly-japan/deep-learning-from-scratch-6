@@ -27,6 +27,6 @@ print(text)
 # Hello. What can I help you with?<|endoftext|>
 
 # トークン化
-token_ids = tokenizer.encode(text)
-print(token_ids)
+ids = tokenizer.encode(text)
+print(ids)
 # [35, 35, 35, 962, 519, 117, 389, 58, 10, 846, 10, 10, 35, 35, 35, 752, 568, 58, 10, 846, 46, 840, 104, 277, 280, 356, 473, 708, 108, 112, 930, 657, 63, 999]

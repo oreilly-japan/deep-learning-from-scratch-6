@@ -132,7 +132,7 @@ grpo_model_save_path = 'codebot/model_grpo.pt'
 
 # ハイパーパラメータ
 learning_rate = 2e-6
-max_iters = 200
+max_iters = 500
 n_update_per_generation = 2  # 同じ生成データに対しての更新回数
 eval_interval = 10
 epsilon = 0.2  # クリッピング範囲

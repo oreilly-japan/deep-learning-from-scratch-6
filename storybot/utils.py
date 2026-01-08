@@ -15,8 +15,8 @@ def generate(model, tokenizer, prompt, max_new_tokens=1000, temperature=1.0):
     next_id = ids
 
     for _ in range(max_new_tokens):
-        if ids.size(1) > model.context_len:
-            ids = ids[:, -model.context_len:]
+        if ids.size(1) > model.max_context_len:
+            ids = ids[:, -model.max_context_len:]
 
         logits = model(next_id, use_cache=True)[:, -1, :]  # kv cache
         if temperature == 0:
