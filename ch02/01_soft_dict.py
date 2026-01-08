@@ -10,19 +10,19 @@ d = {
 
 # キーを指定して値を取得
 query = 'banana'
-print(d[query]) # 200
+print(d[query])  # 200
 
 
 # キー: (アクション性, ドラマ性, コメディ性) 各0〜10で表現
 # バリュー: ユーザーの評価点 (0〜100点)
 movie_preferences = {
-    (8, 2, 3): 85,   # アクション重視の映画
-    (3, 9, 1): 70,   # ドラマ重視の映画
-    (1, 2, 9): 60,   # コメディ重視の映画
-    (5, 5, 5): 75,   # バランスの取れた映画
-    (7, 6, 2): 80,   # アクションドラマ
-    (2, 7, 6): 65,   # ドラマコメディ
-    (9, 1, 1): 90,   # 純粋なアクション
+    (8, 2, 3): 85,  # アクション重視の映画
+    (3, 9, 1): 70,  # ドラマ重視の映画
+    (1, 2, 9): 60,  # コメディ重視の映画
+    (5, 5, 5): 75,  # バランスの取れた映画
+    (7, 6, 2): 80,  # アクションドラマ
+    (2, 7, 6): 65,  # コメディドラマ
+    (9, 1, 1): 90,  # 純粋なアクション
 }
 
 # 新しい映画
@@ -50,6 +50,6 @@ def soft_dictionary(query, dictionary):
 predicted_rating, weights = soft_dictionary(new_movie, movie_preferences)
 
 print(f"新しい映画 {new_movie} の予測評価: {predicted_rating:.2f} 点")
-print("\n貢献度:")
+print("\n各映画の重み:")
 for key, weight in zip(movie_preferences.keys(), weights):
     print(f"映画 {key}: {weight*100:.2f}%")

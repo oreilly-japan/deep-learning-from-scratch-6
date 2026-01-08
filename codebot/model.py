@@ -4,7 +4,7 @@ import torch.nn.functional as F
 
 
 class MultiHeadAttention(nn.Module):
-    def __init__(self, embed_dim, n_head, head_dim, dropout=0.1):
+    def __init__(self, embed_dim, n_head, head_dim, dropout_rate=0.1):
         super().__init__()
         self.n_head = n_head
         self.head_dim = head_dim
@@ -15,8 +15,8 @@ class MultiHeadAttention(nn.Module):
         self.W_v = nn.Linear(E, H*D, bias=False)
         self.W_o = nn.Linear(H*D, E, bias=False)
 
-        self.attention_dropout = nn.Dropout(dropout)
-        self.output_dropout = nn.Dropout(dropout)
+        self.attention_dropout = nn.Dropout(dropout_rate)
+        self.output_dropout = nn.Dropout(dropout_rate)
 
     def forward(self, x):
         B, C, E = x.shape
@@ -100,10 +100,10 @@ class Block(nn.Module):
 
 
 class GPT(nn.Module):
-    def __init__(self, vocab_size, context_len, embed_dim, n_head, n_layer, ff_dim, dropout_rate):
+    def __init__(self, vocab_size, max_context_len, embed_dim, n_head, n_layer, ff_dim, dropout_rate):
         super().__init__()
         self.vocab_size = vocab_size
-        self.context_len = context_len
+        self.max_context_len = max_context_len
         self.embed_dim = embed_dim
         self.n_head = n_head
         self.n_layer = n_layer
@@ -111,7 +111,7 @@ class GPT(nn.Module):
         self.dropout_rate = dropout_rate
 
         self.embed = nn.Embedding(vocab_size, embed_dim)
-        self.pos_embed = nn.Embedding(context_len, embed_dim)
+        self.pos_embed = nn.Embedding(max_context_len, embed_dim)
         self.dropout = nn.Dropout(dropout_rate)
 
         self.blocks = nn.ModuleList([
@@ -153,7 +153,7 @@ class GPT(nn.Module):
         checkpoint = {
             'model_state_dict': self.state_dict(),
             'vocab_size': self.vocab_size,
-            'context_len': self.context_len,
+            'max_context_len': self.max_context_len,
             'embed_dim': self.embed_dim,
             'n_head': self.n_head,
             'n_layer': self.n_layer,
@@ -168,7 +168,7 @@ class GPT(nn.Module):
 
         model = cls(
             vocab_size=checkpoint['vocab_size'],
-            context_len=checkpoint['context_len'],
+            max_context_len=checkpoint['max_context_len'],
             embed_dim=checkpoint['embed_dim'],
             n_head=checkpoint['n_head'],
             n_layer=checkpoint['n_layer'],

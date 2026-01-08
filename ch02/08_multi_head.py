@@ -4,9 +4,9 @@ import torch.nn.functional as F
 
 B = 2   # バッチサイズ（batch_size）
 C = 4   # コンテキスト長（context_len）
-E = 16  # 埋め込み次元（embed_dim）
+E = 16  # 埋め込みの次元数（embed_dim）
 H = 3   # ヘッド数（n_head）
-D = 8   # ヘッド次元（head_dim）
+D = 8   # ヘッドの次元数（head_dim）
 
 # 入力テンソル
 x = torch.randn(B, C, E)
@@ -46,7 +46,7 @@ output = W_o(hidden)  # (B, C, E)
 
 
 class MultiHeadAttention(nn.Module):
-    def __init__(self, embed_dim, n_head, head_dim, dropout=0.1):
+    def __init__(self, embed_dim, n_head, head_dim, dropout_rate=0.1):
         super().__init__()
         self.n_head = n_head
         self.head_dim = head_dim
@@ -58,11 +58,11 @@ class MultiHeadAttention(nn.Module):
         self.W_o = nn.Linear(H*D, E, bias=False)
 
         # Dropoutを追加
-        self.attention_dropout = nn.Dropout(dropout)
-        self.output_dropout = nn.Dropout(dropout)
+        self.attention_dropout = nn.Dropout(dropout_rate)
+        self.output_dropout = nn.Dropout(dropout_rate)
 
     def forward(self, x):
-        B, C, E = x.shape  # バッチサイズ、コンテキスト長, 埋め込み次元
+        B, C, E = x.shape  # バッチサイズ、コンテキスト長、埋め込み次元
         H, D = self.n_head, self.head_dim  # ヘッドサイズ、ヘッドの次元数
 
         # Q, K, V の計算

@@ -8,18 +8,19 @@ from codebot.model import Block
 
 
 class GPT(nn.Module):
-    def __init__(self, vocab_size, context_len, embed_dim, n_head, n_layer, ff_dim, dropout_rate):
+    def __init__(self, vocab_size, max_context_len, embed_dim, n_head, n_layer, ff_dim, dropout_rate):
         super().__init__()
-        self.vocab_size = vocab_size      # 語彙サイズ
-        self.context_len = context_len    # コンテキスト長
-        self.embed_dim = embed_dim        # 埋め込み次元数
-        self.n_head = n_head              # Attentionのヘッド数
-        self.n_layer = n_layer            # Transformerブロックの数
-        self.ff_dim = ff_dim              # FFNの隠れ層サイズ
+        self.vocab_size = vocab_size            # 語彙サイズ
+        self.max_context_len = max_context_len  # 最大コンテキスト長
+        self.embed_dim = embed_dim              # 埋め込み次元数
+        self.n_head = n_head                    # Attentionのヘッド数
+        self.n_layer = n_layer                  # Transformerブロックの数
+        self.ff_dim = ff_dim                    # FFNの隠れ層サイズ
+        self.dropout_rate = dropout_rate        # ドロップアウト率
 
         # 埋め込み層
         self.embed = nn.Embedding(vocab_size, embed_dim)
-        self.pos_embed = nn.Embedding(context_len, embed_dim)
+        self.pos_embed = nn.Embedding(max_context_len, embed_dim)
         self.dropout = nn.Dropout(dropout_rate)
 
         # Transformerブロック
@@ -69,7 +70,7 @@ class GPT(nn.Module):
         checkpoint = {
             'model_state_dict': self.state_dict(),
             'vocab_size': self.vocab_size,
-            'context_len': self.context_len,
+            'max_context_len': self.max_context_len,
             'embed_dim': self.embed_dim,
             'n_head': self.n_head,
             'n_layer': self.n_layer,
@@ -84,7 +85,7 @@ class GPT(nn.Module):
 
         model = cls(
             vocab_size=checkpoint['vocab_size'],
-            context_len=checkpoint['context_len'],
+            max_context_len=checkpoint['max_context_len'],
             embed_dim=checkpoint['embed_dim'],
             n_head=checkpoint['n_head'],
             n_layer=checkpoint['n_layer'],
@@ -99,7 +100,7 @@ class GPT(nn.Module):
 
 
 vocab_size = 1000
-context_len = 256
+max_context_len = 256
 embed_dim = 384
 n_head = 6
 n_layer = 6
@@ -107,10 +108,10 @@ ff_dim = 4 * embed_dim
 dropout_rate = 0.1
 
 # モデルを作成
-model = GPT(vocab_size, context_len, embed_dim, n_head,
+model = GPT(vocab_size, max_context_len, embed_dim, n_head,
              n_layer, ff_dim, dropout_rate)
 
 # 動作テスト
-dummy_input = torch.randint(0, vocab_size, (1, context_len))
+dummy_input = torch.randint(0, vocab_size, (1, max_context_len))
 logits = model(dummy_input)
 print(f"出力形状: {logits.shape}")

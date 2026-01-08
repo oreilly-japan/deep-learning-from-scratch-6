@@ -164,10 +164,10 @@ class Block(nn.Module):
 
 
 class GPT(nn.Module):
-    def __init__(self, vocab_size, context_len, embed_dim, n_head, n_layer, ff_dim, theta=10000):
+    def __init__(self, vocab_size, max_context_len, embed_dim, n_head, n_layer, ff_dim, theta=10000):
         super().__init__()
         self.vocab_size = vocab_size
-        self.context_len = context_len
+        self.max_context_len = max_context_len
         self.embed_dim = embed_dim
         self.n_head = n_head
         self.n_layer = n_layer
@@ -177,7 +177,7 @@ class GPT(nn.Module):
         self.embed = nn.Embedding(vocab_size, embed_dim)
 
         head_dim = embed_dim // n_head
-        rope = RoPE(theta, head_dim, context_len)
+        rope = RoPE(theta, head_dim, max_context_len)
 
         self.blocks = nn.ModuleList([
             Block(embed_dim, n_head, ff_dim, rope)
@@ -209,7 +209,7 @@ class GPT(nn.Module):
         checkpoint = {
             'model_state_dict': self.state_dict(),
             'vocab_size': self.vocab_size,
-            'context_len': self.context_len,
+            'max_context_len': self.max_context_len,
             'embed_dim': self.embed_dim,
             'n_head': self.n_head,
             'n_layer': self.n_layer,
@@ -224,7 +224,7 @@ class GPT(nn.Module):
 
         model = cls(
             vocab_size=checkpoint['vocab_size'],
-            context_len=checkpoint['context_len'],
+            max_context_len=checkpoint['max_context_len'],
             embed_dim=checkpoint['embed_dim'],
             n_head=checkpoint['n_head'],
             n_layer=checkpoint['n_layer'],
@@ -243,7 +243,7 @@ class GPT(nn.Module):
 
 if __name__ == "__main__":
     vocab_size = 1000
-    context_len = 256
+    max_context_len = 256
     embed_dim = 384
     n_head = 6
     n_layer = 6
@@ -251,9 +251,9 @@ if __name__ == "__main__":
     theta = 10000
 
     # モデルを作成
-    model = GPT(vocab_size, context_len, embed_dim, n_head,
+    model = GPT(vocab_size, max_context_len, embed_dim, n_head,
                 n_layer, ff_dim, theta)
     # 動作テスト
-    dummy_input = torch.randint(0, vocab_size, (1, context_len))
+    dummy_input = torch.randint(0, vocab_size, (1, max_context_len))
     logits = model(dummy_input)
     print(f"出力形状: {logits.shape}")

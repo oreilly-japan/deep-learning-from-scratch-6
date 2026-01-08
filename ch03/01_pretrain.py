@@ -29,7 +29,7 @@ embed_dim = 384
 n_head = 6
 n_layer = 6
 ff_dim = 4 * embed_dim
-dropout = 0.1
+dropout_rate = 0.1
 
 # データセットクラス
 class TokenDataset(Dataset):
@@ -54,12 +54,12 @@ dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 tokenizer = BPETokenizer.load_from(tokenizer_path)
 model = GPT(
     vocab_size=vocab_size,
-    context_len=context_len,
+    max_context_len=context_len,
     embed_dim=embed_dim,
     n_head=n_head,
     n_layer=n_layer,
     ff_dim=ff_dim,
-    dropout_rate=dropout
+    dropout_rate=dropout_rate
 ).to(device)
 optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
 

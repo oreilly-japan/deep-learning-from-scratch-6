@@ -118,38 +118,6 @@ class MultiHeadAttention(nn.Module):
         output = self.W_o(hidden)
         return output
 
-    def save(self, file_path):
-        checkpoint = {
-            'model_state_dict': self.state_dict(),
-            'vocab_size': self.vocab_size,
-            'context_len': self.context_len,
-            'embed_dim': self.embed_dim,
-            'n_head': self.n_head,
-            'n_layer': self.n_layer,
-            'ff_dim': self.ff_dim,
-            'theta': self.theta,
-        }
-        torch.save(checkpoint, file_path)
-
-    @classmethod
-    def load_from(cls, file_path, device='cpu'):
-        checkpoint = torch.load(file_path, map_location=device)
-
-        model = cls(
-            vocab_size=checkpoint['vocab_size'],
-            context_len=checkpoint['context_len'],
-            embed_dim=checkpoint['embed_dim'],
-            n_head=checkpoint['n_head'],
-            n_layer=checkpoint['n_layer'],
-            ff_dim=checkpoint['ff_dim'],
-            theta=checkpoint['theta']
-        )
-
-        model.load_state_dict(checkpoint['model_state_dict'])
-        model.to(device)
-
-        return model
-
     def clear_cache(self):
         """キャッシュをクリアする"""
         self.k_cache = None
@@ -197,10 +165,10 @@ class Block(nn.Module):
 
 
 class GPT(nn.Module):
-    def __init__(self, vocab_size, context_len, embed_dim, n_head, n_layer, ff_dim, theta=10000):
+    def __init__(self, vocab_size, max_context_len, embed_dim, n_head, n_layer, ff_dim, theta=10000):
         super().__init__()
         self.vocab_size = vocab_size
-        self.context_len = context_len
+        self.max_context_len = max_context_len
         self.embed_dim = embed_dim
         self.n_head = n_head
         self.n_layer = n_layer
@@ -210,7 +178,7 @@ class GPT(nn.Module):
         self.embed = nn.Embedding(vocab_size, embed_dim)
 
         head_dim = embed_dim // n_head
-        rope = RoPE(theta, head_dim, context_len)
+        rope = RoPE(theta, head_dim, max_context_len)
 
         self.blocks = nn.ModuleList([
             Block(embed_dim, n_head, ff_dim, rope)
@@ -237,6 +205,38 @@ class GPT(nn.Module):
         x = self.norm(x)
         logits = self.unembed(x)
         return logits
+
+    def save(self, file_path):
+        checkpoint = {
+            'model_state_dict': self.state_dict(),
+            'vocab_size': self.vocab_size,
+            'max_context_len': self.max_context_len,
+            'embed_dim': self.embed_dim,
+            'n_head': self.n_head,
+            'n_layer': self.n_layer,
+            'ff_dim': self.ff_dim,
+            'theta': self.theta,
+        }
+        torch.save(checkpoint, file_path)
+
+    @classmethod
+    def load_from(cls, file_path, device='cpu'):
+        checkpoint = torch.load(file_path, map_location=device)
+
+        model = cls(
+            vocab_size=checkpoint['vocab_size'],
+            max_context_len=checkpoint['max_context_len'],
+            embed_dim=checkpoint['embed_dim'],
+            n_head=checkpoint['n_head'],
+            n_layer=checkpoint['n_layer'],
+            ff_dim=checkpoint['ff_dim'],
+            theta=checkpoint['theta']
+        )
+
+        model.load_state_dict(checkpoint['model_state_dict'])
+        model.to(device)
+
+        return model
 
     def clear_cache(self):
         """全てのブロックのキャッシュをクリアする"""
@@ -287,7 +287,7 @@ def measure_generation_time(model, start_ids,use_cache, num_tokens=100):
     return elapsed
 
 # テスト
-model = GPT(vocab_size=1000, context_len=256, embed_dim=384,
+model = GPT(vocab_size=1000, max_context_len=256, embed_dim=384,
             n_head=6, n_layer=6, ff_dim=1024)
 
 

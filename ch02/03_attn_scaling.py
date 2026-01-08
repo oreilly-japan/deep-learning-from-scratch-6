@@ -2,7 +2,7 @@ import torch
 import torch.nn.functional as F
 
 x = torch.tensor([100.0, 200.0, 300.0])
-y = F.softmax(x)
+y = F.softmax(x, dim=0)
 print(y)
 
 
