@@ -10,7 +10,6 @@ from torch.utils.data import DataLoader, Dataset
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 from codebot.model import GPT
-from codebot.tokenizer import BPETokenizer
 from codebot.utils import get_device
 
 # 設定
@@ -50,8 +49,7 @@ ids = np.fromfile(data_path, dtype=np.uint16)
 dataset = TokenDataset(ids, context_len)
 dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
-# トークナイザ、モデル、オプティマイザ
-tokenizer = BPETokenizer.load_from(tokenizer_path)
+# モデル、オプティマイザ
 model = GPT(
     vocab_size=vocab_size,
     max_context_len=context_len,
