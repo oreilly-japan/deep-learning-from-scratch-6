@@ -1,24 +1,24 @@
 # 'A' の場合
-encoded = 'A'.encode('utf-8')
+encoded = 'A'.encode("utf-8")
 print(encoded)        # b'A'
 print(list(encoded))  # [65]
 
 # 'あ' の場合
-encoded = 'あ'.encode('utf-8')
+encoded = 'あ'.encode("utf-8")
 print(encoded)        # b'\xe3\x81\x82'
 print(list(encoded))  # [227, 129, 130]
 
 ids = [65]
-decoded = bytes(ids).decode('utf-8')
+decoded = bytes(ids).decode("utf-8")
 print(decoded)   # 'A'
 
 
 class ByteTokenizer:
     def encode(self, text):
-        return list(text.encode('utf-8'))
+        return list(text.encode("utf-8"))
 
     def decode(self, ids):
-        return bytes(ids).decode('utf-8')
+        return bytes(ids).decode("utf-8")
 
 
 # 使用例

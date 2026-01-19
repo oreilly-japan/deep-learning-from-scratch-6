@@ -113,15 +113,17 @@ def grpo_loss(model, old_model, ids, mask, advantages, epsilon=0.2):
         old_probs = compute_probs(old_model, ids)
 
     # トークンごとの確率比
-    ratio = probs / old_probs
+    ratio = probs / (old_probs + 1e-8)
     advantages = advantages.unsqueeze(-1)
 
     unclipped = ratio * advantages
     clipped = torch.clamp(ratio, 1 - epsilon, 1 + epsilon) * advantages
 
-    mask = mask[:, 1:]  # マスクもシフト
+    mask = mask[:, 1:]
     token_objective = torch.min(unclipped, clipped) * mask
-    return -token_objective.sum() / mask.sum()
+
+    n_samples = ids.size(0)
+    return -token_objective.sum() / n_samples
 
 
 # 設定
@@ -131,7 +133,7 @@ sft_model_path = 'codebot/model_sft.pt'
 grpo_model_save_path = 'codebot/model_grpo.pt'
 
 # ハイパーパラメータ
-learning_rate = 2e-6
+learning_rate = 7e-6
 max_iters = 500
 n_update_per_generation = 2  # 同じ生成データに対しての更新回数
 eval_interval = 10
@@ -177,6 +179,7 @@ for i in pbar:
         optimizer.zero_grad()
         loss = grpo_loss(model, old_model, ids, mask, all_advantages, epsilon)
         loss.backward()
+        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)  # 勾配クリッピング
         optimizer.step()
 
     # 定期的に評価
@@ -206,4 +209,4 @@ plt.ylabel('Accuracy (%)')
 plt.title('GRPO Training')
 plt.grid(True)
 plt.tight_layout()
-plt.show()
+plt.savefig("loss_grpo.png")

@@ -34,7 +34,7 @@ def get_batch(data, context_len, batch_size, device, random=True, offset=0):
     else:
         ix = torch.arange(offset, offset + batch_size * context_len, context_len)
 
-        ix = ix[ix + context_len < len(data)]
+        ix = ix[ix + context_len + 1 < len(data)]
         if len(ix) == 0:
             return None, None
 

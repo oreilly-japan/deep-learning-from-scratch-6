@@ -22,7 +22,7 @@ class BPETokenizer:
         self.id_to_bytes = {i: bytes([i]) for i in range(256)}
         for (token1, token2), new_id in merge_rules.items():
             self.id_to_bytes[new_id] = self.id_to_bytes[token1] + self.id_to_bytes[token2]
-        self.id_to_bytes[self.end_token_id] = self.end_token.encode('utf-8')
+        self.id_to_bytes[self.end_token_id] = self.end_token.encode("utf-8")
 
         self.vocab_size = len(self.id_to_bytes)
 
