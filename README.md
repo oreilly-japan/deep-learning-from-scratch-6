@@ -26,23 +26,45 @@
 * PyTorch 2.x
 * tqdm
 
-※Pythonのバージョンは **3系** を利用します。
+※Pythonのバージョンは **3.10以上** を利用します。
+
+
+## 環境構築
+
+### uvを使う場合
+
+[uv](https://docs.astral.sh/uv/)は高速なPythonパッケージマネージャーです。`uv.lock`により、OSを問わず同じ環境を再現できます。
+```bash
+# uvのインストール（未インストールの場合）
+curl -LsSf https://astral.sh/uv/install.sh | sh   # Mac/Linux
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"  # Windows
+```
+
+実行は`uv run`を使います。環境構築も自動で行われます。
+```bash
+uv run python ch01/01_char_tokenizer.py
+```
+
+### pipを使う場合
+```bash
+pip install -r requirements.txt
+python ch01/01_char_tokenizer.py
+```
 
 
 ## 実行方法
 
 各章のフォルダへ移動して実行するか、親フォルダから実行します。
-
-```
+```bash
 # 各章のフォルダ内で実行
 $ cd ch01
 $ python 01_char_tokenizer.py
 
 # 親フォルダから実行
-$ cd ../
 $ python ch02/10_gpt.py
 ```
 
+uvを使う場合は`python`を`uv run python`に置き換えてください。
 
 ## ライセンス
 
