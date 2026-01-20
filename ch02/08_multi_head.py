@@ -76,7 +76,7 @@ class MultiHeadAttention(nn.Module):
         V = V.view(B, C, H, D).transpose(1, 2)  # (B, H, C, D)
 
         scores = torch.matmul(Q, K.transpose(-2, -1))  # (B, H, C, C)
-        scores = scores / (self.head_dim ** 0.5)
+        scores = scores / (D ** 0.5)
 
         # マスク処理
         mask = torch.tril(torch.ones(C, C, device=scores.device))

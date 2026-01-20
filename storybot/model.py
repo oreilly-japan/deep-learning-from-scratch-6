@@ -103,7 +103,7 @@ class MultiHeadAttention(nn.Module):
 
         # 通常のAttention計算
         scores = torch.matmul(Q, K.transpose(-2, -1))
-        scores = scores / (self.head_dim ** 0.5)
+        scores = scores / (D ** 0.5)
 
         if not use_cache:
             mask = torch.tril(torch.ones(C, C, device=scores.device))

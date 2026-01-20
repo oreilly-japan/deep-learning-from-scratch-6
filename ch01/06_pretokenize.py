@@ -3,10 +3,10 @@ import regex as re
 from tqdm import tqdm
 
 
-def pretokenize_iter(text):
+def pretokenize(text):
+    # GPT-2で使用されている正規表現パターン
     pattern = r"""'(?:[sdmt]|ll|ve|re)| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+"""
-    for m in re.finditer(pattern, text):
-        yield m.group(0)
+    return re.findall(pattern, text)
 
 def count_pairs(ids, counts=None):
     if counts is None:
@@ -35,7 +35,7 @@ def train_bpe(input_text, vocab_size, end_token="<|endoftext|>"):
     # ステップ2: 各テキスト片を事前トークン化
     ids_list = []
     for text in texts:
-        for pretoken in pretokenize_iter(text):
+        for pretoken in pretokenize(text):  # 事前トークン化
             ids_list.append(list(pretoken.encode("utf-8")))  # ID列に変換
 
     # ==== 残りは元のコードと同じ（ただしtqdmを追加） ====
@@ -69,8 +69,8 @@ class BPETokenizer:
         self.end_token_id = 256 + len(merge_rules)
 
         self.id_to_bytes = {i: bytes([i]) for i in range(256)}
-        for (token1, token2), new_id in merge_rules.items():
-            self.id_to_bytes[new_id] = self.id_to_bytes[token1] + self.id_to_bytes[token2]
+        for (id1, id2), new_id in merge_rules.items():
+            self.id_to_bytes[new_id] = self.id_to_bytes[id1] + self.id_to_bytes[id2]
         self.id_to_bytes[self.end_token_id] = self.end_token.encode("utf-8")
 
         self.vocab_size = len(self.id_to_bytes)
@@ -94,7 +94,7 @@ class BPETokenizer:
                 all_ids.append(self.end_token_id)
             else:
                 # 各事前トークンをBPEエンコード
-                for pretoken in pretokenize_iter(text):
+                for pretoken in pretokenize(text):
                     ids = self._encode_text(pretoken)
                     all_ids.extend(ids)
 

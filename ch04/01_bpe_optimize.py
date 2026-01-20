@@ -7,10 +7,9 @@ import regex as re
 from tqdm import tqdm
 
 
-def pretokenize_iter(text):
+def pretokenize(text):
     pattern = r"""'(?:[sdmt]|ll|ve|re)| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+"""
-    for m in re.finditer(pattern, text):
-        yield m.group(0)
+    return re.findall(pattern, text)
 
 def count_pairs(ids, weight=1, counts=None):
     if counts is None:
@@ -39,7 +38,7 @@ def train_bpe(input_text, vocab_size, end_token="<|endoftext|>"):
     # 各テキスト片を事前トークン化
     pretoken_counts = defaultdict(int)
     for text in tqdm(texts, desc="Pretokenizing"):  # 進捗表示のためtqdmを使用
-        for pretoken in pretokenize_iter(text):
+        for pretoken in pretokenize(text):
             pretoken_counts[pretoken] += 1
 
     # 事前トークンをID列に変換

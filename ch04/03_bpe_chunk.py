@@ -8,7 +8,7 @@ import regex as re
 from tqdm import tqdm
 
 
-def pretokenize_iter(text):
+def pretokenize(text):
     pattern = r"""'(?:[sdmt]|ll|ve|re)| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+"""
     for m in re.finditer(pattern, text):
         yield m.group(0)
@@ -96,7 +96,7 @@ def train_bpe(file_path, vocab_size, end_token="<|endoftext|>"):
             texts = chunk_text.split(end_token)
             # 各テキスト片を事前トークン化
             for text in texts:
-                for pretoken in pretokenize_iter(text):
+                for pretoken in pretokenize(text):
                     pretoken_counts[pretoken] += 1
 
 

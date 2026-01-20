@@ -2,7 +2,7 @@ import os, sys
 os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 sys.path.append('.')
 
-from storybot.tokenizer import pretokenize_iter, count_pairs, merge, find_chunk_boundaries
+from storybot.tokenizer import pretokenize, count_pairs, merge, find_chunk_boundaries
 
 import os
 import pickle
@@ -20,8 +20,8 @@ class BPETokenizer:
         self.end_token_id = 256 + len(merge_rules)
 
         self.id_to_bytes = {i: bytes([i]) for i in range(256)}
-        for (token1, token2), new_id in merge_rules.items():
-            self.id_to_bytes[new_id] = self.id_to_bytes[token1] + self.id_to_bytes[token2]
+        for (id1, id2), new_id in merge_rules.items():
+            self.id_to_bytes[new_id] = self.id_to_bytes[id1] + self.id_to_bytes[id2]
         self.id_to_bytes[self.end_token_id] = self.end_token.encode("utf-8")
 
         self.vocab_size = len(self.id_to_bytes)
@@ -137,7 +137,7 @@ class BPETokenizer:
                 all_ids.append(self.end_token_id)
             else:
                 # 各事前トークンをBPEエンコード
-                for pretoken in pretokenize_iter(text):
+                for pretoken in pretokenize(text):
                     ids = self._encode_text(pretoken)
                     all_ids.extend(ids)
 

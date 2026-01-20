@@ -70,7 +70,7 @@ class MultiHeadAttention(nn.Module):
             K = self.rope(K)
 
         scores = torch.matmul(Q, K.transpose(-2, -1))
-        scores = scores / (self.head_dim ** 0.5)
+        scores = scores / (D ** 0.5)
 
         mask = torch.tril(torch.ones(C, C, device=scores.device))
         scores = scores.masked_fill(mask == 0, float('-inf'))

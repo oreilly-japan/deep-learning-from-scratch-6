@@ -47,8 +47,8 @@ class GPT(nn.Module):
         elif isinstance(module, nn.Embedding):
             torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
 
-    def forward(self, ids, targets=None):
-        B, C = ids.size()  # B: バッチサイズ、C: コンテキスト長
+    def forward(self, ids):
+        B, C = ids.shape()  # B: バッチサイズ、C: コンテキスト長
         device = ids.device
 
         # 埋め込み

@@ -10,7 +10,7 @@ from tqdm import tqdm
 import pickle
 
 
-def pretokenize_iter(text):
+def pretokenize(text):
     pattern = r"""'(?:[sdmt]|ll|ve|re)| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+"""
     for m in re.finditer(pattern, text):
         yield m.group(0)
@@ -93,7 +93,7 @@ def pretoken_chunk(args):
 
         # 各テキストを事前トークン化
         for text in texts:
-            for pretoken in pretokenize_iter(text):
+            for pretoken in pretokenize(text):
                 pretoken_counts[pretoken] += 1
 
     return pretoken_counts

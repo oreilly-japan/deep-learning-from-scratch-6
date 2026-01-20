@@ -31,7 +31,7 @@ class MultiHeadAttention(nn.Module):
         V = V.view(B, C, H, D).transpose(1, 2)  # (B, H, C, D)
 
         scores = torch.matmul(Q, K.transpose(-2, -1))  # (B, H, C, C)
-        scores = scores / (self.head_dim ** 0.5)
+        scores = scores / (D ** 0.5)
 
         mask = torch.tril(torch.ones(C, C, device=scores.device))
         scores = scores.masked_fill(mask == 0, float('-inf'))
@@ -134,7 +134,7 @@ class GPT(nn.Module):
             torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
 
     def forward(self, ids):
-        B, C = ids.size()
+        B, C = ids.shape
         device = ids.device
 
         pos = torch.arange(0, C, dtype=torch.long, device=device)

@@ -8,7 +8,7 @@ from tqdm import tqdm
 import numpy as np
 
 
-def pretokenize_iter(text):
+def pretokenize(text):
     pattern = r"""'(?:[sdmt]|ll|ve|re)| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+"""
     for m in re.finditer(pattern, text):
         yield m.group(0)
@@ -91,7 +91,7 @@ def process_single_chunk(file_path, start, end, end_token):
 
         # 各テキストを事前トークン化
         for text in texts:
-            for pretoken in pretokenize_iter(text):
+            for pretoken in pretokenize(text):
                 pretoken_counts[pretoken] += 1
 
     return pretoken_counts
@@ -111,7 +111,7 @@ def pretoken_chunk(args):
 
         # 各テキストを事前トークン化
         for text in texts:
-            for pretoken in pretokenize_iter(text):
+            for pretoken in pretokenize(text):
                 pretoken_counts[pretoken] += 1
 
     return pretoken_counts
@@ -196,8 +196,8 @@ class BPETokenizer:
         self.end_token_id = 256 + len(merge_rules)
 
         self.id_to_bytes = {i: bytes([i]) for i in range(256)}
-        for (token1, token2), new_id in merge_rules.items():
-            self.id_to_bytes[new_id] = self.id_to_bytes[token1] + self.id_to_bytes[token2]
+        for (id1, id2), new_id in merge_rules.items():
+            self.id_to_bytes[new_id] = self.id_to_bytes[id1] + self.id_to_bytes[id2]
         self.id_to_bytes[self.end_token_id] = self.end_token.encode("utf-8")
 
         self.vocab_size = len(self.id_to_bytes)
@@ -244,7 +244,7 @@ class BPETokenizer:
                 all_ids.append(self.end_token_id)
             else:
                 # 各事前トークンをBPEエンコード
-                for pretoken in pretokenize_iter(text):
+                for pretoken in pretokenize(text):
                     ids = self._encode_text(pretoken)
                     all_ids.extend(ids)
 
