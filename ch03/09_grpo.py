@@ -101,7 +101,7 @@ def compute_probs(model, ids):
     probs = F.softmax(logits[:, :-1, :], dim=-1)  # (B, C-1, V)
     labels = ids[:, 1:]  # (B, C-1)
 
-    token_probs = probs.gather(2, labels.unsqueeze(-1)).squeeze(-1)  # (B, C-1)
+    token_probs = probs.gather(-1, labels.unsqueeze(-1)).squeeze(-1)  # (B, C-1)
 
     return token_probs
 
@@ -112,17 +112,18 @@ def grpo_loss(model, old_model, ids, mask, advantages, epsilon=0.2):
     with torch.no_grad():
         old_probs = compute_probs(old_model, ids)
 
-    # トークンごとの確率比
+    # トークンごとの確率比（0除算防止のため微小値を加算）
     ratio = probs / (old_probs + 1e-8)
     advantages = advantages.unsqueeze(-1)
 
     unclipped = ratio * advantages
     clipped = torch.clamp(ratio, 1 - epsilon, 1 + epsilon) * advantages
 
-    mask = mask[:, 1:]
+    mask = mask[:, 1:]  # マスクもシフト
     token_objective = torch.min(unclipped, clipped) * mask
 
-    n_samples = ids.size(0)
+    # サンプル数 (batch_size × group_size) で正規化
+    n_samples = ids.size(0)  # batch_size × group_size
     return -token_objective.sum() / n_samples
 
 
@@ -209,4 +210,5 @@ plt.ylabel('Accuracy (%)')
 plt.title('GRPO Training')
 plt.grid(True)
 plt.tight_layout()
-plt.savefig("loss_grpo.png")
+# plt.savefig("loss_grpo.png")
+plt.savefig('loss_grpo.svg', bbox_inches='tight')

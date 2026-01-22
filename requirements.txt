@@ -2,6 +2,7 @@ torch>=2.0.0
 numpy>=1.24.0,<2.0.0
 matplotlib>=3.7.0
 tqdm>=4.65.0
+regex>=2023.0.0
 
 # Optional dependencies
 openai>=1.0.0  # For LLM-as-a-Judge evaluation (ch06/07_llm_judge.py)

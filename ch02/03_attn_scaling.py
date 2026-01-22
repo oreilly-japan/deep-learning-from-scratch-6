@@ -43,7 +43,6 @@ plt.figure(figsize=(10, 6))
 plt.hist(dot_products, bins=50, alpha=0.5, label='Without scaling')
 plt.hist(scaled_dot_products, bins=50, alpha=0.5, label='With scaling')
 plt.legend()
-plt.savefig("scaled_dot_product.svg", bbox_inches='tight')
 plt.show()
 
 print("Variances without scaling:", np.var(dot_products))

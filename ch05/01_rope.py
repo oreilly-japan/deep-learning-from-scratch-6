@@ -55,9 +55,6 @@ class MultiHeadAttention(nn.Module):
 
         self.rope = rope
 
-        mask = torch.tril(torch.ones(max_context_len, max_context_len))
-        self.register_buffer("mask", mask)
-
     def forward(self, x):
         B, C, E = x.shape
         H, D = self.n_head, self.head_dim

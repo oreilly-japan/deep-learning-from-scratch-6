@@ -48,7 +48,7 @@ class GPT(nn.Module):
             torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
 
     def forward(self, ids):
-        B, C = ids.shape()  # B: バッチサイズ、C: コンテキスト長
+        B, C = ids.shape  # B: バッチサイズ、C: コンテキスト長
         device = ids.device
 
         # 埋め込み

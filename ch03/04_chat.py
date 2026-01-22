@@ -9,6 +9,7 @@ from codebot.utils import generate, get_device
 # 設定
 device = get_device()
 model_path = 'codebot/model_sft.pt'
+# model_path = 'codebot/model_grpo.pt'
 tokenizer_path = 'codebot/merge_rules.pkl'
 max_new_tokens = 200
 temperature = 1.0

@@ -85,6 +85,6 @@ plt.plot(losses)
 plt.xlabel('Iteration')
 plt.ylabel('Loss')
 plt.grid(True)
-plt.savefig('loss.png')
+plt.savefig('loss_pretrain.png')
 
 model.save(model_save_path)

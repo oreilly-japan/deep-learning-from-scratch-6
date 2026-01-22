@@ -114,6 +114,7 @@ plt.plot(losses)
 plt.xlabel('Iteration')
 plt.ylabel('Loss')
 plt.grid(True)
-plt.show()
+plt.savefig('loss_sft.png')
 
+# モデルの保存
 model.save(sft_model_save_path)
