@@ -24,6 +24,9 @@ class RoPE(nn.Module):
     def forward(self, x):
         batch_size, num_head, context_len, key_dim = x.shape
 
+        input_dtype = x.dtype
+        x = x.float()
+
         cos = self.cos_cache[:context_len]
         sin = self.sin_cache[:context_len]
 
@@ -35,7 +38,8 @@ class RoPE(nn.Module):
 
         out = torch.stack([x_rot_even, x_rot_odd], dim=-1)
         out = out.reshape(batch_size, num_head, context_len, key_dim)
-        return out
+
+        return out.to(input_dtype)
 
 
 class MultiHeadAttention(nn.Module):
@@ -111,11 +115,11 @@ class Block(nn.Module):
         self.norm1 = nn.RMSNorm(embed_dim)
         self.attn = MultiHeadAttention(embed_dim, n_head, head_dim, rope)
         self.norm2 = nn.RMSNorm(embed_dim)
-        self.mlp = SwiGLU(embed_dim, ff_dim)
+        self.ffn = SwiGLU(embed_dim, ff_dim)
 
     def forward(self, x):
         x = x + self.attn(self.norm1(x))
-        x = x + self.mlp(self.norm2(x))
+        x = x + self.ffn(self.norm2(x))
         return x
 
 
