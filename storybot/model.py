@@ -24,6 +24,10 @@ class RoPE(nn.Module):
     def forward(self, x, offset=0):
         batch_size, num_head, context_len, key_dim = x.shape
 
+        # 入力の型を保存し、float32で計算
+        input_dtype = x.dtype
+        x = x.float()
+
         # offsetを考慮して位置エンコーディングを取得
         max_context_len = self.cos_cache.size(0)
         if offset + context_len > max_context_len:
@@ -40,8 +44,8 @@ class RoPE(nn.Module):
 
         out = torch.stack([x_rot_even, x_rot_odd], dim=-1)
         out = out.reshape(batch_size, num_head, context_len, key_dim)
-        return out
 
+        return out.to(input_dtype)  # 元の型に戻す
 
 class MultiHeadAttention(nn.Module):
     def __init__(self, embed_dim, n_head, head_dim, rope=None):

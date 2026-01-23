@@ -24,6 +24,10 @@ class RoPE(nn.Module):
     def forward(self, x):
         batch_size, num_head, context_len, key_dim = x.shape
 
+        # 入力の型を保存し、float32で計算
+        input_dtype = x.dtype
+        x = x.float()
+
         cos = self.cos_cache[:context_len]
         sin = self.sin_cache[:context_len]
 
@@ -38,8 +42,8 @@ class RoPE(nn.Module):
         # 偶数・奇数インデックスを元に戻す
         out = torch.stack([x_rot_even, x_rot_odd], dim=-1)  # (batch_size, num_head, context_len, key_dim/2, 2)
         out = out.reshape(batch_size, num_head, context_len, key_dim)
-        return out
 
+        return out.to(input_dtype)  # 元の型に戻す
 
 class MultiHeadAttention(nn.Module):
     def __init__(self, embed_dim, n_head, head_dim, rope=None):
