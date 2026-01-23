@@ -155,6 +155,6 @@ plt.plot(val_iters, val_losses)
 plt.xlabel('Iteration')
 plt.ylabel('Validation Loss')
 plt.grid(True)
-plt.savefig('loss_val.png')
+plt.savefig('val_loss.png')
 
 model.save(model_save_path)
