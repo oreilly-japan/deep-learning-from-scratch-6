@@ -18,7 +18,7 @@ client = OpenAI(api_key="your_api_key_here")
 device = get_device()
 tokenizer_path = 'storybot/merge_rules.pkl'
 tokenizer = BPETokenizer.load_from(tokenizer_path)
-ß
+
 # 評価するモデルのパス（イテレーションごとに保存したもの）
 model_paths = {
     500: 'storybot/model_iter_500.pt',

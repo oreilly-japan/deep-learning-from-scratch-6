@@ -25,7 +25,6 @@ def generate(model, tokenizer, prompt, max_new_tokens=1000, temperature=1.0):
             probs = F.softmax(logits / temperature, dim=-1)
             next_id = torch.multinomial(probs, num_samples=1)
 
-        probs = F.softmax(logits, dim=-1)
         next_id = torch.multinomial(probs, num_samples=1)
 
         if next_id.item() == tokenizer.end_token_id:

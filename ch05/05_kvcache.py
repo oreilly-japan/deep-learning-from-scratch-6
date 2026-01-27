@@ -276,7 +276,6 @@ def generate_with_cache(model, start_ids, max_new_tokens):
     return ids
 
 def measure_generation_time(model, start_ids,use_cache, num_tokens=100):
-
     if not use_cache:
         model.clear_cache()
 

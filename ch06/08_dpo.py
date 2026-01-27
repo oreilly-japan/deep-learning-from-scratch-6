@@ -29,6 +29,7 @@ max_iters = 1000
 
 
 class DPODataset(Dataset):
+    # コンストラクタ
     def __init__(self, data_path, tokenizer, context_len):
         self.tokenizer = tokenizer
         self.context_len = context_len
@@ -41,32 +42,44 @@ class DPODataset(Dataset):
             sample = self._create_sample(item['prompt'], item['chosen'], item['rejected'])
             self.samples.append(sample)
 
+    # パディングとマスクの作成
+    def _pad_and_mask(self, ids, prompt_len):
+        mask = [0] * prompt_len + [1] * (len(ids) - prompt_len)
+
+        if len(ids) > self.context_len:
+            ids = ids[:self.context_len]
+            mask = mask[:self.context_len]
+        else:
+            pad_len = self.context_len - len(ids)
+            ids = ids + [0] * pad_len
+            mask = mask + [0] * pad_len
+
+        return ids, mask
+
+    # サンプル作成
     def _create_sample(self, prompt, chosen, rejected):
-        """1つのサンプルからchosen/rejectedのinput_idsとmaskを作成"""
         prompt_ids = self.tokenizer.encode(prompt)
         chosen_ids = prompt_ids + self.tokenizer.encode(chosen)
         rejected_ids = prompt_ids + self.tokenizer.encode(rejected)
 
-        def pad_and_mask(ids, prompt_len):
-            # マスク: プロンプト部分は0、応答部分は1
-            mask = [0] * prompt_len + [1] * (len(ids) - prompt_len)
-
-            # context_lenに合わせてパディング
-            if len(ids) > self.context_len:
-                ids = ids[:self.context_len]
-                mask = mask[:self.context_len]
-            else:
-                pad_len = self.context_len - len(ids)
-                ids = ids + [0] * pad_len
-                mask = mask + [0] * pad_len
-
-            return ids, mask
-
         prompt_len = len(prompt_ids)
-        chosen_ids, chosen_mask = pad_and_mask(chosen_ids, prompt_len)
-        rejected_ids, rejected_mask = pad_and_mask(rejected_ids, prompt_len)
+        chosen_ids, chosen_mask = self._pad_and_mask(chosen_ids, prompt_len)
+        rejected_ids, rejected_mask = self._pad_and_mask(rejected_ids, prompt_len)
 
         return chosen_ids, chosen_mask, rejected_ids, rejected_mask
+
+    # DataLoader用メソッド
+    def __len__(self):
+        return len(self.samples)
+
+    def __getitem__(self, idx):
+        chosen_ids, chosen_mask, rejected_ids, rejected_mask = self.samples[idx]
+        return (
+            torch.tensor(chosen_ids, dtype=torch.long),
+            torch.tensor(chosen_mask, dtype=torch.long),
+            torch.tensor(rejected_ids, dtype=torch.long),
+            torch.tensor(rejected_mask, dtype=torch.long),
+        )
 
     def __len__(self):
         return len(self.samples)
@@ -153,6 +166,6 @@ plt.plot(losses)
 plt.xlabel('Iteration')
 plt.ylabel('Loss')
 plt.grid(True)
-plt.show()
+plt.savefig("loss_dpo.svg", bbox_inches='tight')
 
 model.save(dpo_model_save_path)

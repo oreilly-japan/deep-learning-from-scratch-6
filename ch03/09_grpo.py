@@ -101,7 +101,9 @@ def compute_probs(model, ids):
     probs = F.softmax(logits[:, :-1, :], dim=-1)  # (B, C-1, V)
     labels = ids[:, 1:]  # (B, C-1)
 
-    token_probs = probs.gather(-1, labels.unsqueeze(-1)).squeeze(-1)  # (B, C-1)
+    token_probs = torch.gather(
+        probs, dim=-1, index=labels.unsqueeze(-1)
+    ).squeeze(-1)  # (B, C-1)
 
     return token_probs
 
@@ -210,5 +212,4 @@ plt.ylabel('Accuracy (%)')
 plt.title('GRPO Training')
 plt.grid(True)
 plt.tight_layout()
-# plt.savefig("loss_grpo.png")
-plt.savefig('loss_grpo.svg', bbox_inches='tight')
+plt.savefig("loss_grpo.png")

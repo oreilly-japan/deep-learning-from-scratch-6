@@ -13,3 +13,7 @@ wget -nc https://huggingface.co/datasets/koki0702/zero-llm-data/resolve/main/sto
 # wget -nc https://huggingface.co/datasets/koki0702/zero-llm-data/resolve/main/storybot/merge_rules.pkl
 
 # === model files ===
+# wget -nc https://huggingface.co/datasets/koki0702/zero-llm-data/resolve/main/storybot/model_pretrain.pt
+# wget -nc https://huggingface.co/datasets/koki0702/zero-llm-data/resolve/main/storybot/model_iter_500.pt
+# wget -nc https://huggingface.co/datasets/koki0702/zero-llm-data/resolve/main/storybot/model_iter_5000.pt
+# wget -nc https://huggingface.co/datasets/koki0702/zero-llm-data/resolve/main/storybot/model_dpo.pt
