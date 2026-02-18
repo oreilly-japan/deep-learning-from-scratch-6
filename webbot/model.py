@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import time
 
 
 class RoPE(nn.Module):
@@ -25,6 +24,7 @@ class RoPE(nn.Module):
     def forward(self, x, offset=0):
         batch_size, num_head, context_len, key_dim = x.shape
 
+        # 入力の型を保存し、float32で計算
         input_dtype = x.dtype
         x = x.float()
 
@@ -45,39 +45,37 @@ class RoPE(nn.Module):
         out = torch.stack([x_rot_even, x_rot_odd], dim=-1)
         out = out.reshape(batch_size, num_head, context_len, key_dim)
 
-        return out.to(input_dtype)
+        return out.to(input_dtype)  # 元の型に戻す
 
 
 class MultiHeadAttention(nn.Module):
-    def __init__(self, embed_dim, n_head, head_dim, rope=None):
+    def __init__(self, embed_dim, n_head, n_kv_head, head_dim, rope=None):
         super().__init__()
         self.n_head = n_head
+        self.n_kv_head = n_kv_head
         self.head_dim = head_dim
-        E, H, D = embed_dim, n_head, head_dim
+        E, H, KV, D = embed_dim, n_head, n_kv_head, head_dim
 
-        self.W_q = nn.Linear(E, H*D, bias=False)
-        self.W_k = nn.Linear(E, H*D, bias=False)
-        self.W_v = nn.Linear(E, H*D, bias=False)
-        self.W_o = nn.Linear(H*D, E, bias=False)
+        self.W_q = nn.Linear(E, H * D, bias=False)
+        self.W_k = nn.Linear(E, KV * D, bias=False)
+        self.W_v = nn.Linear(E, KV * D, bias=False)
+        self.W_o = nn.Linear(H * D, E, bias=False)
 
         self.rope = rope
 
-        # KV-Cache用の変数を追加
-        self.k_cache = None  # Keyのキャッシュ
-        self.v_cache = None  # Valueのキャッシュ
-        self.cache_offset = 0  # 現在のキャッシュ位置を追跡
+        # KV-Cache用の変数
+        self.k_cache = None
+        self.v_cache = None
+        self.cache_offset = 0
 
     def forward(self, x, use_cache=False):
         B, C, E = x.shape
-        H, D = self.n_head, self.head_dim
+        H, KV, D = self.n_head, self.n_kv_head, self.head_dim
 
-        Q = self.W_q(x)
-        K = self.W_k(x)
-        V = self.W_v(x)
+        Q = self.W_q(x).view(B, C, H, D).transpose(1, 2)    # (B, H, C, D)
+        K = self.W_k(x).view(B, C, KV, D).transpose(1, 2)   # (B, KV, C, D)
+        V = self.W_v(x).view(B, C, KV, D).transpose(1, 2)   # (B, KV, C, D)
 
-        Q = Q.view(B, C, H, D).transpose(1, 2)
-        K = K.view(B, C, H, D).transpose(1, 2)
-        V = V.view(B, C, H, D).transpose(1, 2)
 
         # RoPEにoffsetを渡す
         if self.rope is not None:
@@ -90,39 +88,39 @@ class MultiHeadAttention(nn.Module):
 
         # KV-Cacheの処理
         if use_cache:
-            # Prefill（初回）かDecode（2回目以降）かを判定
+            # 初回かどうかを判定（キャッシュ更新前に）
             is_first_call = (self.k_cache is None)
 
             if is_first_call:
-                # 初回:キャッシュを初期化
                 self.k_cache = K
                 self.v_cache = V
             else:
-                # 2回目以降:新しいKeyとValueをキャッシュに追加
                 self.k_cache = torch.cat([self.k_cache, K], dim=2)
                 self.v_cache = torch.cat([self.v_cache, V], dim=2)
 
-            # オフセットを更新(次のトークンの位置へ)
             self.cache_offset += C
 
-            # キャッシュされた全てのKeyとValueを使用
+            # コンテキスト長制限: キャッシュが長すぎる場合は古い部分を切り捨て
+            max_cache_len = self.rope.cos_cache.size(0) if self.rope else 2048
+            if self.k_cache.size(2) > max_cache_len:
+                self.k_cache = self.k_cache[:, :, -max_cache_len:]
+                self.v_cache = self.v_cache[:, :, -max_cache_len:]
+                self.cache_offset = max_cache_len
+
             K = self.k_cache
             V = self.v_cache
 
-        # 通常のAttention計算
-        scores = torch.matmul(Q, K.transpose(-2, -1))
-        scores = scores / (D ** 0.5)
-
-        # Causal Maskの適用
-        # - 学習時（use_cache=False）: 常に適用
-        # - Prefill（初回・プロンプト全体処理）: 適用（各トークンは前方のみ）
-        # - Decode（2回目以降・1トークン生成）: 不要（新トークンは全キャッシュにattend）
-        if not use_cache or (use_cache and is_first_call):
-            mask = torch.tril(torch.ones(C, C, device=scores.device))
-            scores = scores.masked_fill(mask == 0, float('-inf'))
-
-        weights = F.softmax(scores, dim=-1)
-        hidden = torch.matmul(weights, V)
+        # Flash Attention（GQA対応）
+        if use_cache:
+            # Prefill（初回・プロンプト全体処理）: is_causal=True（各トークンは前方のみ）
+            # Decode（2回目以降・1トークン生成）: is_causal=False（新トークンは全キャッシュにattend）
+            is_causal = is_first_call
+            hidden = F.scaled_dot_product_attention(Q, K, V, is_causal=is_causal,
+                                                    enable_gqa=True)
+        else:
+            # 学習時: is_causal=Trueでcausal mask適用
+            hidden = F.scaled_dot_product_attention(Q, K, V, is_causal=True,
+                                                    enable_gqa=True)
 
         hidden = hidden.transpose(1, 2).contiguous()
         hidden = hidden.view(B, C, H * D)
@@ -135,8 +133,6 @@ class MultiHeadAttention(nn.Module):
         self.v_cache = None
         self.cache_offset = 0
 
-def silu(x):
-    return x * torch.sigmoid(x)
 
 class SwiGLU(nn.Module):
     def __init__(self, x_dim, hidden_dim=None):
@@ -151,17 +147,17 @@ class SwiGLU(nn.Module):
     def forward(self, x):
         a = self.W(x)
         b = self.V(x)
-
-        gated = F.silu(a) * b  # silu(a) * b
+        gated = F.silu(a) * b
         out = self.O(gated)
         return out
 
+
 class Block(nn.Module):
-    def __init__(self, embed_dim, n_head, ff_dim, rope=None):
+    def __init__(self, embed_dim, n_head, n_kv_head, ff_dim, rope=None):
         super().__init__()
         head_dim = embed_dim // n_head
         self.norm1 = nn.RMSNorm(embed_dim)
-        self.attn = MultiHeadAttention(embed_dim, n_head, head_dim, rope)
+        self.attn = MultiHeadAttention(embed_dim, n_head, n_kv_head, head_dim, rope)
         self.norm2 = nn.RMSNorm(embed_dim)
         self.mlp = SwiGLU(embed_dim, ff_dim)
 
@@ -176,12 +172,14 @@ class Block(nn.Module):
 
 
 class GPT(nn.Module):
-    def __init__(self, vocab_size, max_context_len, embed_dim, n_head, n_layer, ff_dim, theta=10000):
+    def __init__(self, vocab_size, max_context_len, embed_dim, n_head,
+                 n_kv_head, n_layer, ff_dim, theta=10000):
         super().__init__()
         self.vocab_size = vocab_size
         self.max_context_len = max_context_len
         self.embed_dim = embed_dim
         self.n_head = n_head
+        self.n_kv_head = n_kv_head
         self.n_layer = n_layer
         self.ff_dim = ff_dim
         self.theta = theta
@@ -192,7 +190,7 @@ class GPT(nn.Module):
         rope = RoPE(theta, head_dim, max_context_len)
 
         self.blocks = nn.ModuleList([
-            Block(embed_dim, n_head, ff_dim, rope)
+            Block(embed_dim, n_head, n_kv_head, ff_dim, rope)
             for _ in range(n_layer)
         ])
 
@@ -224,6 +222,7 @@ class GPT(nn.Module):
             'max_context_len': self.max_context_len,
             'embed_dim': self.embed_dim,
             'n_head': self.n_head,
+            'n_kv_head': self.n_kv_head,
             'n_layer': self.n_layer,
             'ff_dim': self.ff_dim,
             'theta': self.theta,
@@ -239,6 +238,7 @@ class GPT(nn.Module):
             max_context_len=checkpoint['max_context_len'],
             embed_dim=checkpoint['embed_dim'],
             n_head=checkpoint['n_head'],
+            n_kv_head=checkpoint['n_kv_head'],
             n_layer=checkpoint['n_layer'],
             ff_dim=checkpoint['ff_dim'],
             theta=checkpoint['theta']
@@ -250,87 +250,29 @@ class GPT(nn.Module):
         return model
 
     def clear_cache(self):
-        """全てのブロックのキャッシュをクリアする"""
         for block in self.blocks:
             block.clear_cache()
 
 
-def generate_without_cache(model, start_ids, max_new_tokens):
-    model.eval()
+if __name__ == "__main__":
+    vocab_size = 50000
+    max_context_len = 1024
+    embed_dim = 768
+    n_head = 12
+    n_kv_head = 4
+    n_layer = 12
+    ff_dim = 2048
+    theta = 10000
 
-    ids = start_ids  # 最初のトークン
-    with torch.no_grad():
-        for _ in range(max_new_tokens):
-            # 毎回、全てのトークンを渡す
-            logits = model(ids, use_cache=False)
-            next_id = torch.argmax(logits[:, -1, :], dim=-1, keepdim=True)
-            # 新しいトークンを連結
-            ids = torch.cat([ids, next_id], dim=1)
+    # モデルを作成
+    model = GPT(vocab_size, max_context_len, embed_dim, n_head,
+                n_kv_head, n_layer, ff_dim, theta)
 
-    return ids
+    # パラメータ数を表示
+    num_params = sum(p.numel() for p in model.parameters())
+    print(f"パラメータ数: {num_params:,} ({num_params/1e6:.1f}M)")
 
-def generate_with_cache(model, start_ids, max_new_tokens):
-    model.eval()
-
-    ids = start_ids  # 最初のトークン
-    next_id = start_ids
-    with torch.no_grad():
-        for _ in range(max_new_tokens):
-            # 1トークンずつ生成
-            logits = model(next_id, use_cache=True)
-            next_id = torch.argmax(logits[:, -1, :], dim=-1, keepdim=True)
-            ids = torch.cat([ids, next_id], dim=1)
-    return ids
-
-def measure_generation_time(model, start_ids,use_cache, num_tokens=100):
-    if not use_cache:
-        model.clear_cache()
-
-    start_time = time.time()
-
-    if use_cache:
-        generate_with_cache(model, start_ids, num_tokens)
-    else:
-        generate_without_cache(model, start_ids, num_tokens)
-
-    elapsed = time.time() - start_time
-    return elapsed
-
-# テスト
-model = GPT(vocab_size=1000, max_context_len=256, embed_dim=384,
-            n_head=6, n_layer=6, ff_dim=1024)
-
-
-start_ids = torch.tensor([[42]])  # 固定シード
-max_new_tokens = 200
-
-time_without = measure_generation_time(model, start_ids, use_cache=False, num_tokens=max_new_tokens)
-time_with = measure_generation_time(model, start_ids, use_cache=True)
-print(f"KV-Cacheなし: {time_without:.2f}秒")
-print(f"KV-Cacheあり: {time_with:.2f}秒")
-print(f"高速化率: {time_without / time_with:.1f}倍")
-
-"""
-print("\n=== 出力の一致確認 ===")
-model.clear_cache()
-
-# 同じ開始トークンで生成
-
-# KV-Cacheなしで生成
-output_without = generate_without_cache(model, start_ids, max_new_tokens=max_new_tokens)
-print(f"KV-Cacheなし: {output_without[0, :11].tolist()}")
-
-# KV-Cacheありで生成
-model.clear_cache()
-output_with = generate_with_cache(model, start_ids, max_new_tokens=max_new_tokens)
-
-print(f"KV-Cacheあり: {output_with[0, :11].tolist()}")
-
-print(output_with.shape, output_without.shape)
-# 一致確認
-if torch.equal(output_without[:, :max_new_tokens], output_with[:, :max_new_tokens]):
-    print("✓ 出力が一致しました!")
-else:
-    print("✗ 出力が一致しません")
-    print(f"差分の数: {(output_without[:, :max_new_tokens] != output_with[:, :max_new_tokens]).sum().item()}")
-"""
+    # 動作テスト
+    dummy_input = torch.randint(0, vocab_size, (1, max_context_len))
+    logits = model(dummy_input)
+    print(f"出力形状: {logits.shape}")

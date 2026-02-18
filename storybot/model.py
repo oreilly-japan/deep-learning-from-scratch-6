@@ -89,7 +89,10 @@ class MultiHeadAttention(nn.Module):
 
         # KV-Cacheの処理
         if use_cache:
-            if self.k_cache is None:
+            # Prefill（初回）かDecode（2回目以降）かを判定
+            is_first_call = (self.k_cache is None)
+
+            if is_first_call:
                 # 初回:キャッシュを初期化
                 self.k_cache = K
                 self.v_cache = V
@@ -109,7 +112,11 @@ class MultiHeadAttention(nn.Module):
         scores = torch.matmul(Q, K.transpose(-2, -1))
         scores = scores / (D ** 0.5)
 
-        if not use_cache:
+        # Causal Maskの適用
+        # - 学習時（use_cache=False）: 常に適用
+        # - Prefill（初回・プロンプト全体処理）: 適用（各トークンは前方のみ）
+        # - Decode（2回目以降・1トークン生成）: 不要（新トークンは全キャッシュにattend）
+        if not use_cache or (use_cache and is_first_call):
             mask = torch.tril(torch.ones(C, C, device=scores.device))
             scores = scores.masked_fill(mask == 0, float('-inf'))
 
