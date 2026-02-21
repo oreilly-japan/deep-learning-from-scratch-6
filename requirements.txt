@@ -7,3 +7,4 @@ regex>=2023.0.0
 # Optional dependencies
 openai>=1.0.0  # For LLM-as-a-Judge evaluation (ch06/07_llm_judge.py)
 tiktoken>=0.5.0  # For tokenizer comparison (ch01/08_eval.py)
+wandb>=0.16.0  # For experiment tracking
