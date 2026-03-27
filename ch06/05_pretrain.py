@@ -84,7 +84,6 @@ context_len = 256
 vocab_size = 10000
 batch_size = 32
 learning_rate = 0.001  # max_lr
-min_lr = 1e-5  # 最小学習率
 warmup_iters = 200  # ウォームアップステップ数
 max_iters = 40000
 embed_dim = 512
