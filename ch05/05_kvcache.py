@@ -163,11 +163,11 @@ class Block(nn.Module):
         self.norm1 = nn.RMSNorm(embed_dim)
         self.attn = MultiHeadAttention(embed_dim, n_head, head_dim, rope)
         self.norm2 = nn.RMSNorm(embed_dim)
-        self.mlp = SwiGLU(embed_dim, ff_dim)
+        self.ffn = SwiGLU(embed_dim, ff_dim)
 
     def forward(self, x, use_cache=False):
         x = x + self.attn(self.norm1(x), use_cache=use_cache)
-        x = x + self.mlp(self.norm2(x))
+        x = x + self.ffn(self.norm2(x))
         return x
 
     def clear_cache(self):
@@ -305,7 +305,7 @@ start_ids = torch.tensor([[42]])  # 固定シード
 max_new_tokens = 200
 
 time_without = measure_generation_time(model, start_ids, use_cache=False, num_tokens=max_new_tokens)
-time_with = measure_generation_time(model, start_ids, use_cache=True)
+time_with = measure_generation_time(model, start_ids, use_cache=True, num_tokens=max_new_tokens)
 print(f"KV-Cacheなし: {time_without:.2f}秒")
 print(f"KV-Cacheあり: {time_with:.2f}秒")
 print(f"高速化率: {time_without / time_with:.1f}倍")

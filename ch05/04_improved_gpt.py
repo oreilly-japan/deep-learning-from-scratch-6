@@ -214,4 +214,4 @@ model = GPT(vocab_size, max_context_len, embed_dim, n_head,
 batch_size = 8
 dummy_input = torch.randint(0, vocab_size, (batch_size, max_context_len))
 logits = model(dummy_input)
-print(logits.shape)  # torch.Size([8, 256, 1000])
+print(logits.shape)  # torch.Size([8, 256, 10000])

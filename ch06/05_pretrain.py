@@ -2,12 +2,10 @@ import os, sys
 os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 sys.path.append('.')
 
-import argparse
 import numpy as np
-import math
 import torch
 import torch.nn.functional as F
-from torch.amp import autocast, GradScaler
+from torch.amp import autocast
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 from storybot.model import GPT
@@ -108,6 +106,7 @@ model = GPT(
     vocab_size, context_len, embed_dim, n_head, n_layer, ff_dim, theta
 ).to(device)
 optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
+model = model.to(dtype=torch.bfloat16)
 
 pbar = tqdm(range(max_iters))
 
@@ -134,7 +133,6 @@ for i in pbar:
     loss.backward()
     torch.nn.utils.clip_grad_norm_(model.parameters(), grad_clip)
     optimizer.step()
-
     # 特定のイテレーションでモデルを保存
     if i in save_iters:
         save_path = f'storybot/model_iter_{i}.pt'

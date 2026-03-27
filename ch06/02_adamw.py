@@ -57,7 +57,7 @@ class AdamW(Optimizer):
 
                 lr, eps, wd = group['lr'], group['eps'], group['weight_decay']
                 # パラメータ更新
-                p.data = p.data - lr * m_hat / (v_hat.sqrt() + eps) - (1 - lr * wd) * p.data
+                p.data = p.data - lr * m_hat / (v_hat.sqrt() + eps) - lr * wd * p.data
 
 
 torch.manual_seed(0)

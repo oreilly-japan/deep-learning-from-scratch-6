@@ -81,18 +81,6 @@ class DPODataset(Dataset):
             torch.tensor(rejected_mask, dtype=torch.long),
         )
 
-    def __len__(self):
-        return len(self.samples)
-
-    def __getitem__(self, idx):
-        chosen_ids, chosen_mask, rejected_ids, rejected_mask = self.samples[idx]
-        return (
-            torch.tensor(chosen_ids, dtype=torch.long),
-            torch.tensor(chosen_mask, dtype=torch.long),
-            torch.tensor(rejected_ids, dtype=torch.long),
-            torch.tensor(rejected_mask, dtype=torch.long),
-        )
-
 
 def get_sequence_logprobs(model, ids, mask):
     logits = model(ids)  # (B, C, V)
