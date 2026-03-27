@@ -15,7 +15,7 @@ tokenizer_path = 'storybot/merge_rules.pkl'
 # 生成設定
 # prompt = "Once upon a time"  # 生成の開始プロンプト
 prompt = "<|endoftext|>"
-max_new_tokens = 1000  # 生成するトークン数の上限
+max_new_tokens = 300  # 生成するトークン数の上限
 temperature = 1.0  # 温度パラメータ（高いほどランダム）
 num_samples = 3  # 生成するサンプル数
 

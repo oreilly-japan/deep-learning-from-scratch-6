@@ -61,13 +61,13 @@ def evaluate(model, val_data, context_len, batch_size, device):
             if x is None:
                 break
 
-            with autocast(device_type=device.type):
+            with autocast(device_type=device.type, dtype=torch.bfloat16):
                 logits = model(x)
                 loss = F.cross_entropy(logits.view(-1, logits.size(-1)),
                                     y.view(-1), reduction='sum')
 
             total_loss += loss.item()
-            total_tokens += x.numel()
+            total_tokens += y.numel()
 
     model.train()
     return total_loss / total_tokens
@@ -152,6 +152,6 @@ plt.plot(val_iters, val_losses)
 plt.xlabel('Iteration')
 plt.ylabel('Validation Loss')
 plt.grid(True)
-plt.savefig('val_loss.png')
+plt.savefig('loss_val.png')
 
 model.save(model_save_path)
