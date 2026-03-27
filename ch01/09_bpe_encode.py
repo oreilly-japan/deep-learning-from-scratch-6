@@ -6,10 +6,12 @@ import numpy as np
 from codebot.tokenizer import BPETokenizer
 
 
-# 事前学習用データのエンコード
-text = open("codebot/tiny_codes.txt").read()
+# トークナイザを読み込み
 tokenizer = BPETokenizer.load_from("codebot/merge_rules.pkl")
-ids = tokenizer.encode(text, show_progress=True)  # プログレスバーを表示
+
+# テキストをトークンIDに変換（進捗バーを表示）
+text = open("codebot/tiny_codes.txt").read()
+ids = tokenizer.encode(text, show_progress=True)
 
 # numpy配列に変換して保存
 ids_array = np.array(ids, dtype=np.uint16)

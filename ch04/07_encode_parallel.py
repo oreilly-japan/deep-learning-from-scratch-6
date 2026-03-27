@@ -75,7 +75,7 @@ class BPETokenizer:
 
 
     def encode_file(self, file_path, output_file,
-                                    num_processes=4, num_chunks=64,
+                                    num_processes=8, num_chunks=64,
                                    cache_dir="bpe_cache"):
 
         # キャッシュディレクトリの準備

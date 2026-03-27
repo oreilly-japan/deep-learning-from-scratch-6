@@ -25,7 +25,7 @@ model = GPT.load_from(model_path, device=device)
 # テキスト生成
 for i in range(num_samples):
     print(f"--- サンプル {i+1} ---")
-    generated_text = generate(
+    story = generate(
         model, tokenizer, prompt, max_new_tokens, temperature
     )
-    print(generated_text)
+    print(story)

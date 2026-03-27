@@ -29,7 +29,7 @@ scores = torch.matmul(Q, K.transpose(-2, -1))  # (B, H, C, C)
 scores = scores / (D ** 0.5)
 
 # マスク処理
-mask = torch.tril(torch.ones_like(scores))
+mask = torch.tril(torch.ones(C, C, device=scores.device))
 scores = scores.masked_fill(mask == 0, float('-inf'))
 
 # Attention重み
