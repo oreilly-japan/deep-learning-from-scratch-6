@@ -61,6 +61,9 @@ model = GPT(
 ).to(device)
 optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
 
+total_params = sum(p.numel() for p in model.parameters())
+print(f"パラメータ数: {total_params:,} ({total_params/1e6:.1f}M)")
+
 losses = []
 data_iter = cycle(dataloader)  # 無限ループ化
 pbar = tqdm(range(max_iters))
