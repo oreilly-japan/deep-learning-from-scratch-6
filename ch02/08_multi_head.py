@@ -109,5 +109,5 @@ x = torch.randn(batch_size, context_len, embed_dim)
 
 # 実行
 output = mha(x)
-print(f"Input shape: {x.shape}")       # (2, 10, 512)
-print(f"Output shape: {output.shape}") # (2, 10, 512)
+print(f"入力形状: {x.shape}")       # (2, 10, 512)
+print(f"出力形状: {output.shape}") # (2, 10, 512)

@@ -139,7 +139,7 @@ for i in pbar:
     if i in save_iters:
         save_path = f'storybot/model_iter_{i}.pt'
         model.save(save_path)
-        print(f"\nModel saved at iteration {i}: {save_path}")
+        print(f"\nモデルを保存しました（イテレーション {i}）: {save_path}")
 
     # 定期的に評価
     if (i % eval_iters) == 0 or i == max_iters - 1:
