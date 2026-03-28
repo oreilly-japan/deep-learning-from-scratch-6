@@ -282,7 +282,7 @@ def generate_with_cache(model, start_ids, max_new_tokens):
             ids = torch.cat([ids, next_id], dim=1)
     return ids
 
-def measure_generation_time(model, start_ids,use_cache, num_tokens=100):
+def measure_generation_time(model, start_ids, use_cache, num_tokens=200):
     if not use_cache:
         model.clear_cache()
 
@@ -302,10 +302,9 @@ model = GPT(vocab_size=1000, max_context_len=256, embed_dim=384,
 
 
 start_ids = torch.tensor([[42]])  # 固定シード
-max_new_tokens = 200
 
-time_without = measure_generation_time(model, start_ids, use_cache=False, num_tokens=max_new_tokens)
-time_with = measure_generation_time(model, start_ids, use_cache=True, num_tokens=max_new_tokens)
+time_without = measure_generation_time(model, start_ids, use_cache=False)
+time_with = measure_generation_time(model, start_ids, use_cache=True)
 print(f"KV-Cacheなし: {time_without:.2f}秒")
 print(f"KV-Cacheあり: {time_with:.2f}秒")
 print(f"高速化率: {time_without / time_with:.1f}倍")
