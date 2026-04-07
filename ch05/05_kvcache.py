@@ -113,11 +113,8 @@ class MultiHeadAttention(nn.Module):
         scores = torch.matmul(Q, K.transpose(-2, -1))
         scores = scores / (D ** 0.5)
 
-        # Causal Maskの適用
-        # - 学習時（use_cache=False）: 常に適用
-        # - Prefill（初回・プロンプト全体処理）: 適用（各トークンは前方のみ）
-        # - Decode（2回目以降・1トークン生成）: 不要（新トークンは全キャッシュにattend）
-        if not use_cache or (use_cache and is_first_call):
+        # Causal Mask（KVキャッシュ使用時は不要）
+        if not use_cache or is_first_call:
             mask = torch.tril(torch.ones(C, C, device=scores.device))
             scores = scores.masked_fill(mask == 0, float('-inf'))
 
