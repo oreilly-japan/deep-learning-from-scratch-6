@@ -3,7 +3,7 @@ name = "dlfs6"
 version = "0.1.0"
 requires-python = ">=3.10"
 dependencies = [
-    "torch>=2.0.0",
+    "torch>=2.5.0",
     "numpy>=1.24.0,<2.0.0",
     "matplotlib>=3.7.0",
     "tqdm>=4.65.0",
