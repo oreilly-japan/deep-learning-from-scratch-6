@@ -154,6 +154,6 @@ plt.plot(losses)
 plt.xlabel('Iteration')
 plt.ylabel('Loss')
 plt.grid(True)
-plt.savefig("loss_dpo.svg", bbox_inches='tight')
+plt.savefig("loss_dpo.png", bbox_inches='tight')
 
 model.save(dpo_model_save_path)
