@@ -3,9 +3,9 @@ import torch.nn as nn
 
 
 class RMSNorm(nn.Module):
-    def __init__(self, x):
+    def __init__(self, embed_dim):
         super().__init__()
-        self.gamma = nn.Parameter(torch.ones(x))
+        self.gamma = nn.Parameter(torch.ones(embed_dim))
         self.eps = 1e-5
 
     def forward(self, x):
